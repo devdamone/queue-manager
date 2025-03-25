@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 @RequestMapping("/v2/queue/messages")
 public class MessageController {
@@ -42,6 +45,19 @@ public class MessageController {
     public EntityModel<MessageRecord> dequeueMessage() {
         MessageRecord dequeuedMessage = messageService.dequeueMessage();
         return messageModelAssembler.toModel(dequeuedMessage);
+    }
+
+    @DeleteMapping
+    public EntityModel<QueueRecord> clearQueue() {
+        messageService.clearQueue();
+
+        QueueRecord queueRecord = new QueueRecord(0);
+
+        return EntityModel.of(queueRecord,
+                linkTo(methodOn(QueueController.class).getQueueInfo()).withSelfRel(),
+                linkTo(methodOn(MessageController.class).enqueueMessage(null)).withRel("enqueue"),
+                linkTo(methodOn(MessageController.class).dequeueMessage()).withRel("dequeue"),
+                linkTo(methodOn(MessageController.class).getClass()).withRel("messages"));
     }
 
     /**

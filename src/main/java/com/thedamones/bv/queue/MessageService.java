@@ -58,6 +58,11 @@ public class MessageService {
                 .orElseThrow(this::emptyQueueException);
     }
 
+    @Transactional
+    public void clearQueue() {
+        messageRepository.deleteAll();
+    }
+
     /**
      * Gets a message by its ID.
      *
